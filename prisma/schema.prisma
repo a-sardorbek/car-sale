@@ -1,0 +1,82 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  url        = env("DATABASE_URL")
+  provider   = "postgresql"
+  extensions = [pgcrypto]
+}
+
+enum UserType {
+  customer
+  seller
+  guest
+
+  @@map("user_type")
+}
+
+enum PostType {
+  daily
+  weekly
+  monthly
+
+  @@map("post_type")
+}
+
+
+enum PayType {
+  HUMO
+  UZCARD
+
+  @@map("pay_type")
+}
+
+model User {
+  id        String       @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid @id
+  fullName  String       @map("full_name") @db.VarChar(255)
+  userName  String       @map("user_name") @db.VarChar(255)
+  phone     String?      @map("phone") @db.VarChar(15)
+  type      UserType     @map("type") @default(guest)
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt DateTime?    @map("deleted_at") @db.Timestamp(0)
+
+  post Post[]
+  payment Payment[]
+
+  @@map("user")
+}
+
+model Post {
+  id          String       @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid  @id
+  title       String       @map("title") @db.VarChar(255)
+  description String       @map("description") @db.Text
+  type        PostType     @map("type") @default(daily)
+  userId      String       @map("user_id") @db.Uuid
+  contactInfo String       @map("contact_info") @db.VarChar(255)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt   DateTime?    @map("deleted_at") @db.Timestamp(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("post")
+}
+
+model Payment {
+  id          String       @default(dbgenerated("gen_random_uuid()")) @map("id") @db.Uuid  @id
+  amount      Int          @map("title") @db.Integer
+  description String       @map("description") @db.Text
+  type        PayType      @map("type")
+  userId      String       @map("user_id") @db.Uuid
+  workId      String       @map("work_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  deletedAt   DateTime?    @map("deleted_at") @db.Timestamp(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@map("payment")
+}

@@ -1,0 +1,5 @@
+export * from './create.post.dto'
+export * from './update.post.dto'
+export * from './delete.post.dto'
+export * from './retrieve.post.dto'
+export * from './retrieve-by-id.post.dto'
